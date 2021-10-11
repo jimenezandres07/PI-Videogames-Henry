@@ -1,59 +1,17 @@
 const { Videogame, Genre, Op } = require("../db");
-const { Router, query } = require("express");
+const { Router } = require("express");
 require("dotenv").config();
 const axios = require("axios");
-const { v4: uuidv4 } = require("uuid");
 const { API_KEY } = process.env;
-
-const router = Router();
-
-//#region GET GENRES
-async function getGenres(req, res, next) {
-  try {
-    let genres = (
-      await axios.get(`https://api.rawg.io/api/genres?key=${API_KEY}`)
-    ).data.results;
-    let genresName = genres.map((e) => e.name);
-    genresName.map(async (el) => {
-      if (el.name) {
-        await Genre.findOrCreate({
-          where: {
-            name: el.name,
-          },
-        });
-      }
-    });
-    res.status(200).send(genresName);
-  } catch (error) {
-    next(error);
-  }
-}
-//#endregion
 
 //#region GET VIDEOGAME
 async function getVideogame(req, res, next) {
   try {
-    let { order, page, name, rating} = req.query;
+    let { order, page, name, rating, origin } = req.query;
     page = page ? page : 1;
     let vidXpage = 15;
-    let allVideogames = [];
-
-    let apiVideogames = (
-      await axios.get(`https://api.rawg.io/api/games?key=${API_KEY}`)
-    ).data.results;
-    let apiVideogames1 = (
-      await axios.get(
-        `https://api.rawg.io/api/games?key=${API_KEY}&page=2&page_size=40`
-      )
-    ).data.results;
-    let apiVideogames2 = (
-      await axios.get(
-        `https://api.rawg.io/api/games?key=${API_KEY}&page=3&page_size=40`
-      )
-    ).data.results;
-
-    let videoGames = apiVideogames.concat(apiVideogames1, apiVideogames2);
-
+    let videogames = [];
+    let dbVideogame = await Videogame.findAll();
     //#region NAME
     if (name && name !== "") {
       let apiSearchVid = (
@@ -61,47 +19,83 @@ async function getVideogame(req, res, next) {
           `https://api.rawg.io/api/games?key=${API_KEY}&search=${name}`
         )
       ).data.results;
-      let dbVideogame = await Videogame.findAll({
+      let dbSearchVid = await Videogame.findAll({
         where: {
           name: {
             [Op.iLike]: `%${name}%`,
           },
         },
+        include: {
+          model: Genre,
+          attributes: ["name"],
+          through: {
+            attributes: [],
+          },
+        },
       });
-      allVideogames = apiSearchVid.concat(dbVideogame);
+      dbSearchVid = dbSearchVid.map((e) => e.dataValues);
+      videogames = dbSearchVid.concat(apiSearchVid);
+      console.log(videogames);
+      //#endregion
     } else {
-      let dbVideogame = await Videogame.findAll({ include: Genre });
-      allVideogames = dbVideogame.concat(videoGames);
-    }
-    //#endregion
-    
-    //#region 
+      let apiVideogames = (
+        await axios.get(`https://api.rawg.io/api/games?key=${API_KEY}`)
+      ).data.results;
+      let apiVideogames1 = (
+        await axios.get(
+          `https://api.rawg.io/api/games?key=${API_KEY}&page=2&page_size=40`
+        )
+      ).data.results;
+      let apiVideogames2 = (
+        await axios.get(
+          `https://api.rawg.io/api/games?key=${API_KEY}&page=3&page_size=40`
+        )
+      ).data.results;
 
-    /*if (rating === "increment" && rating === "") {
-      allVideogames = allVideogames.sort((a, b) => a.rating > b.rating ? 1 : -1);
+      videogames = dbVideogame.concat(
+        apiVideogames,
+        apiVideogames1,
+        apiVideogames2
+      );
     }
-    if (rating === "decrement"){
-      allVideogames = allVideogames.sort((a, b) => a.rating > b.rating ? -1 : 1);
-    }*/
+
+    //#region ORIGIN
+    if (origin === "created") {
+      videogames = videogames.filter((vg) => vg.createdDb);
+    } else {
+      videogames = videogames.filter((vg) => !vg.createdDb);
+    }
+    //origin === 'created' ? videogames.filter(vg => vg.createdDb) : videogames.filter(vg => !vg.createdDb)
+    //#endregion
+
+    //#region RATING
+
+    if (rating === "increment" && rating === "") {
+      videogames = videogames.sort((a, b) => (a.rating > b.rating ? 1 : -1));
+    }
+    if (rating === "decrement") {
+      videogames = videogames.sort((a, b) => (a.rating < b.rating ? -1 : 1));
+    }
 
     //#endregion
 
     //#region ORDER
 
-    if (order === "asc" && !order && order === "") {
-      allVideogames = allVideogames.sort((a, b) => {
-        a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    if (order === "asc") {
+      videogames = videogames.sort((a, b) => {
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
       });
-    } else {
-      allVideogames = allVideogames.sort((a, b) => {
-        b.name.toLowerCase().localeCompare(a.name.toLowerCase());
+    }
+    if (order === "desc") {
+      videogames = videogames.sort((a, b) => {
+        return b.name.toLowerCase().localeCompare(a.name.toLowerCase());
       });
     }
     //#endregion
 
     //#region PAGE
 
-    let result = allVideogames.slice(
+    let result = videogames.slice(
       vidXpage * (page - 1),
       vidXpage * (page - 1) + vidXpage
     );
@@ -109,7 +103,7 @@ async function getVideogame(req, res, next) {
     //#endregion
     return res.send({
       result: result,
-      count: allVideogames.length,
+      count: videogames.length,
     });
   } catch {
     next(console.error("Holi"));
@@ -140,18 +134,19 @@ const addVideogame = async function (req, res, next) {
       released,
       rating,
       platforms,
+      createdDb: true,
     });
 
-    genres?.map(async (g) => {
-      let dbGenres = await Genre.findAll({
-        where: {
-          name: g,
+    let dbGenres = await Genre.findAll({
+      where: {
+        name: {
+          [Op.in]: genres,
         },
-      });
-      await videogame.addGenre(dbGenres);
+      },
     });
-    res.json({ ...videogame, genres });
-    console.log(videogame);
+    await videogame.addGenre(dbGenres);
+
+    res.send("Videogame created");
   }
 };
 //#endregion
@@ -159,23 +154,22 @@ const addVideogame = async function (req, res, next) {
 //#region getVideogameById
 
 const getVideogameById = async (req, res, next) => {
-
-  const {id} = req.params;
+  const { id } = req.params;
   let videogame;
-  if(isNaN(id)){
-    videogame = await Videogame.findByPk(id)
+  if (isNaN(id)) {
+    videogame = await Videogame.findByPk(id);
   } else {
-    videogame = await axios.get(`https://api.rawg.io/api/games/${id}?key=${API_KEY}`);
-    videogame = videogame.data
+    videogame = await axios.get(
+      `https://api.rawg.io/api/games/${id}?key=${API_KEY}`
+    );
+    videogame = videogame.data;
   }
-  return res.json(videogame)
-
-}
+  return res.json(videogame);
+};
 
 //#endregion
 module.exports = {
   getVideogame,
   addVideogame,
-  getGenres,
-  getVideogameById
+  getVideogameById,
 };
