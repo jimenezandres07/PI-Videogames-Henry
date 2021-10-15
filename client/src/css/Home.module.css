@@ -1,0 +1,25 @@
+.allHome {
+    background-image: url("../images/bckg-img-2.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.bottomContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.selectsContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.contentContainer {
+  display: flex;
+  flex-direction: column;
+}

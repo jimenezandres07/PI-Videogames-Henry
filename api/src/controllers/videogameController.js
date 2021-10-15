@@ -2,24 +2,37 @@ const { Videogame, Genre, Op } = require("../db");
 const { Router } = require("express");
 require("dotenv").config();
 const axios = require("axios");
+const db = require("../db");
 const { API_KEY } = process.env;
 
 //#region GET VIDEOGAME
 async function getVideogame(req, res, next) {
   try {
-    let { order, page, name, rating, origin } = req.query;
-    page = page ? page : 1;
-    let vidXpage = 15;
+    let { name, origin } = req.query;
+    //page = page ? page : 1;
+    //let vidXpage = 15;
     let videogames = [];
-    let dbVideogame = await Videogame.findAll();
+    let dbVideogames;
+    let apiVideogames;
+    //let dbVideogame = await Videogame.findAll();
+
     //#region NAME
     if (name && name !== "") {
-      let apiSearchVid = (
+      apiVideogames = (
         await axios.get(
           `https://api.rawg.io/api/games?key=${API_KEY}&search=${name}`
         )
       ).data.results;
-      let dbSearchVid = await Videogame.findAll({
+      apiVideogames = apiVideogames.map((e) => {
+        let mappedApiGenres = e.genres.map((el) => el.name);
+        return {
+          name: e.name,
+          image: e.background_image,
+          genres: mappedApiGenres,
+          id: e.id,
+        };
+      });
+      dbVideogames = await Videogame.findAll({
         where: {
           name: {
             [Op.iLike]: `%${name}%`,
@@ -33,76 +46,74 @@ async function getVideogame(req, res, next) {
           },
         },
       });
-      dbSearchVid = dbSearchVid.map((e) => e.dataValues);
-      videogames = dbSearchVid.concat(apiSearchVid);
-      console.log(videogames);
+      dbVideogames = dbVideogames.map((e) => e.dataValues);
+      dbVideogames = dbVideogames.map((el) => {
+        let vgGenres = el.genres.map((ele) => ele.name);
+        return {
+          ...el,
+          genres: vgGenres,
+        };
+      });
+      videogames = dbVideogames.concat(apiVideogames);
       //#endregion
     } else {
-      let apiVideogames = (
+      let apVideogames = (
         await axios.get(`https://api.rawg.io/api/games?key=${API_KEY}`)
       ).data.results;
-      let apiVideogames1 = (
+      let apVideogames1 = (
         await axios.get(
           `https://api.rawg.io/api/games?key=${API_KEY}&page=2&page_size=40`
         )
       ).data.results;
-      let apiVideogames2 = (
+      let apVideogames2 = (
         await axios.get(
           `https://api.rawg.io/api/games?key=${API_KEY}&page=3&page_size=40`
         )
       ).data.results;
+      apiVideogames = apVideogames.concat(apVideogames1, apVideogames2);
+      apiVideogames = apiVideogames.map((e) => {
+        let mappedApiGenres = e.genres.map((e) => e.name);
+        return {
+          name: e.name,
+          genres: mappedApiGenres,
+          id: e.id,
+          image: e.background_image,
+          rating: e.rating
+        };
+      });
+      dbVideogames = await Videogame.findAll({
+        include: Genre,
+      });
+      dbVideogames = dbVideogames.map((e) => e.dataValues);
 
-      videogames = dbVideogame.concat(
-        apiVideogames,
-        apiVideogames1,
-        apiVideogames2
-      );
+      dbVideogames = dbVideogames.map((el) => {
+        let vgGenres = el.genres.map((ele) => ele.name);
+        return {
+          ...el,
+          genres: vgGenres,
+        };
+      });
+
+      videogames = dbVideogames.concat(apiVideogames);
     }
 
     //#region ORIGIN
     if (origin === "created") {
       videogames = videogames.filter((vg) => vg.createdDb);
-    } else {
+    }
+    if (origin === "existent") {
       videogames = videogames.filter((vg) => !vg.createdDb);
     }
     //origin === 'created' ? videogames.filter(vg => vg.createdDb) : videogames.filter(vg => !vg.createdDb)
     //#endregion
 
-    //#region RATING
 
-    if (rating === "increment" && rating === "") {
-      videogames = videogames.sort((a, b) => (a.rating > b.rating ? 1 : -1));
-    }
-    if (rating === "decrement") {
-      videogames = videogames.sort((a, b) => (a.rating < b.rating ? -1 : 1));
-    }
-
-    //#endregion
-
-    //#region ORDER
-
-    if (order === "asc") {
-      videogames = videogames.sort((a, b) => {
-        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      });
-    }
-    if (order === "desc") {
-      videogames = videogames.sort((a, b) => {
-        return b.name.toLowerCase().localeCompare(a.name.toLowerCase());
-      });
-    }
-    //#endregion
 
     //#region PAGE
 
-    let result = videogames.slice(
-      vidXpage * (page - 1),
-      vidXpage * (page - 1) + vidXpage
-    );
-
     //#endregion
     return res.send({
-      result: result,
+      all: videogames,
       count: videogames.length,
     });
   } catch {
@@ -115,14 +126,14 @@ async function getVideogame(req, res, next) {
 const addVideogame = async function (req, res, next) {
   const {
     name,
-    background_image,
+    image,
     description,
     released,
     rating,
     platforms,
     genres,
   } = req.body;
-  if (!name || !description || !background_image || !genres || !platforms) {
+  if (!name || !description || !image || !genres || !platforms) {
     const err = new Error("Missing parameters");
     err.status = 400;
     next(err);
@@ -130,7 +141,7 @@ const addVideogame = async function (req, res, next) {
     let videogame = await Videogame.create({
       name,
       description,
-      background_image,
+      image,
       released,
       rating,
       platforms,
@@ -163,6 +174,15 @@ const getVideogameById = async (req, res, next) => {
       `https://api.rawg.io/api/games/${id}?key=${API_KEY}`
     );
     videogame = videogame.data;
+    let mappedPlatforms = videogame.platforms.map((e) => e.platform.name)
+    videogame = {
+      name : videogame.name,
+      description: videogame.description,
+      released: videogame.released,
+      rating: videogame.rating,
+      platforms: mappedPlatforms,
+      image: videogame.background_image
+    }
   }
   return res.json(videogame);
 };

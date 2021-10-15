@@ -2,24 +2,34 @@ import axios from "axios";
 export const POST_VIDEOGAME = "POST_VIDEOGAME";
 export const GET_GENRES = "GET_GENRES";
 export const GET_ALL_VIDEOGAMES = "GET_ALL_VIDEOGAMES";
-export const ORDER_ALPH = "ORDER_ALPH";
+export const SET_ORDER = "SET_ORDER";
 export const ORDER_BY_RATING = "ORDER_BY_RATING";
-export const FILTER_VIDEOGAMES_BY_GENRE = "FILTER_VIDEOGAMES_BY_GENRE";
 export const GET_VIDEOGAME = "GET_VIDEOGAME";
 export const FILTER_ORIGIN = "FILTER_ORIGIN";
 export const SET_PAGE = "SET_PAGE";
+export const SET_GENRE = "SET_GENRE";
+export const SET_ORIGIN = "SET_ORIGIN";
+export const RESET_PAGE = "RESET_PAGE";
 
 export const postVideogame = (videogame) => {
-  return async function (dispatch) {
-    let response = axios.post(`http://localhost:3001/videogames/genres`, videogame)
-    return response
-  }
+  return (dispatch) => {
+    axios
+      .post(`http://localhost:3001/videogames/add`, videogame)
+      .then(() => {
+        return dispatch({
+          type: POST_VIDEOGAME,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 };
 
 export const getGenres = () => {
   return (dispatch) => {
     axios
-      .get(`http://localhost:3001/videogames/genres`)
+      .get(`http://localhost:3001/genres`)
       .then((response) => {
         return dispatch({
           type: GET_GENRES,
@@ -32,13 +42,13 @@ export const getGenres = () => {
   };
 };
 
-export const getVideogames = ({ page, order, name, origin, rating }) => {
+export const getVideogames = ({ name, origin }) => {
   return (dispatch) => {
     axios
       .get(
-        `http://localhost:3001/videogames?page=${page ? page : 1}&order=${
-          order ? order : ""
-        }&name=${name ? name : ""}&origin=${origin ? origin : ""}&rating=${rating ? rating : ""}`
+        `http://localhost:3001/videogames?name=${name ? name : ""}&origin=${
+          origin ? origin : ""
+        }`
       )
       .then((videogames) => {
         return dispatch({
@@ -57,6 +67,7 @@ export const getAVideogame = (id) => {
     axios
       .get(`http://localhost:3001/videogames/${id}`)
       .then((videogame) => {
+        console.log(videogame.data);
         return dispatch({
           type: GET_VIDEOGAME,
           payload: videogame.data,
@@ -68,36 +79,41 @@ export const getAVideogame = (id) => {
   };
 };
 
-export const orderAlph = (order) => {
+export const setOrder = (order) => {
   return {
-    type: ORDER_ALPH,
+    type: SET_ORDER,
     payload: order,
   };
 };
 
-export const orderByRating = (rating) => {
+export const resetPage = () => {
   return {
-    type: ORDER_BY_RATING,
-    payload: rating,
+    type: RESET_PAGE,
   };
 };
 
-export const filterVideogamesByGenre = (payload) => {
+export const setGenre = (genre) => {
   return {
-    type: FILTER_VIDEOGAMES_BY_GENRE,
-    payload,
+    type: SET_GENRE,
+    payload: genre,
   };
 };
 
-export const filterByOrigin = (origin) => {
+export const setOrigin = (origin) => {
   return {
-    type: FILTER_ORIGIN,
-    payload: origin
-  }
+    type: SET_ORIGIN,
+    payload: origin,
+  };
 };
 export const setPage = (page) => {
   return {
     type: SET_PAGE,
-    payload: page
-  }
+    payload: page,
+  };
+};
+export const setName = (name) => {
+  return {
+    type: SET_PAGE,
+    payload: name,
+  };
 };
