@@ -1,13 +1,14 @@
 import React from 'react'
 import Card from './Card'
-import {useSelector} from 'react-redux'
+import {useSelector} from 'react-redux';
+import Styles from '../css/Cards.module.css'
 
 function Cards() {
     const { videogames} = useSelector((state) => state);
 
     return (
         <div>
-            <div >
+            <div className={Styles.cards}>
       {videogames?.sliced?.length > 0 &&
         videogames.sliced.map((vg) => {
           return (

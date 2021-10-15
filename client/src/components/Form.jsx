@@ -82,7 +82,7 @@ function Form() {
       setErrors(
         validate({
           ...input,
-          [el.target.name]: el.target.value,
+          [name]: value,
         }))
     } else {
       setInput({
@@ -169,10 +169,10 @@ function Form() {
           type="text"
         />
         <span>{errors.image}</span>
-        <select onChange={handleInputChange} name="genres">
+        <select onChange={handleInputChange} name="genres" type="text">
           {genres.length > 0 &&
             genres.map((e) => (
-              <option key={e.id} value={e.id}>
+              <option key={e.id} value={e.name}>
                 {e.name}
               </option>
             ))}

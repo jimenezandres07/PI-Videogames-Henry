@@ -72,7 +72,7 @@ async function getVideogame(req, res, next) {
       ).data.results;
       apiVideogames = apVideogames.concat(apVideogames1, apVideogames2);
       apiVideogames = apiVideogames.map((e) => {
-        let mappedApiGenres = e.genres.map((e) => e.name);
+        let mappedApiGenres = e.genres.map((el) => el.name);
         return {
           name: e.name,
           genres: mappedApiGenres,
@@ -150,7 +150,7 @@ const addVideogame = async function (req, res, next) {
 
     let dbGenres = await Genre.findAll({
       where: {
-        name: {
+        id: {
           [Op.in]: genres,
         },
       },
