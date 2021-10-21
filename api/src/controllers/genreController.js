@@ -27,7 +27,7 @@ const preloadGenres = async (req, res) => {
 
     return "Videogames loaded";
   } catch (error) {
-    return "No se han cargao";
+    return "Couldn't load videogames x.x";
   }
 };
 const getGenres = async (req, res) => {

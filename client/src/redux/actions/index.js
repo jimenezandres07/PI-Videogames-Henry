@@ -63,11 +63,11 @@ export const getVideogames = ({ name, origin }) => {
 };
 
 export const getAVideogame = (id) => {
-  return async (dispatch) => {
+  return (dispatch) => {
     axios
       .get(`http://localhost:3001/videogames/${id}`)
       .then((videogame) => {
-        console.log(videogame.data);
+        console.log(videogame);
         return dispatch({
           type: GET_VIDEOGAME,
           payload: videogame.data,

@@ -1,10 +1,53 @@
 .allForm {
     background-image: url("../images/bckg-img-2.jpg");
   background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
   background-size: cover;
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+.left {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  width: 30vw;
+  
+
+}
+
+.right {
+  height: 100vh;
+  width: 70vw;
+}
+
+.form {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  height: 100vh;
+}
+
+.formLeft {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 100vh;
+  
+}
+
+.inputContainer {
+
+}
+
+.inputDescription {
+
 }

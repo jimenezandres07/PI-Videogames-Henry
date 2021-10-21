@@ -7,7 +7,7 @@ function Cards() {
     const { videogames} = useSelector((state) => state);
 
     return (
-        <div>
+        <div className = {Styles.cardsContainer}>
             <div className={Styles.cards}>
       {videogames?.sliced?.length > 0 &&
         videogames.sliced.map((vg) => {

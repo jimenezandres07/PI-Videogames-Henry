@@ -1,0 +1,7 @@
+.filterContainer {
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+    padding-left: 20px;
+    justify-content: space-evenly;
+}

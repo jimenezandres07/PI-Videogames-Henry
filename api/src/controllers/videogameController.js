@@ -29,6 +29,7 @@ async function getVideogame(req, res, next) {
           name: e.name,
           image: e.background_image,
           genres: mappedApiGenres,
+          rating:e.rating,
           id: e.id,
         };
       });
@@ -78,7 +79,8 @@ async function getVideogame(req, res, next) {
           genres: mappedApiGenres,
           id: e.id,
           image: e.background_image,
-          rating: e.rating
+          released: e.released,
+          rating: e.rating,
         };
       });
       dbVideogames = await Videogame.findAll({
@@ -104,7 +106,6 @@ async function getVideogame(req, res, next) {
     if (origin === "existent") {
       videogames = videogames.filter((vg) => !vg.createdDb);
     }
-    //origin === 'created' ? videogames.filter(vg => vg.createdDb) : videogames.filter(vg => !vg.createdDb)
     //#endregion
 
 
@@ -150,7 +151,7 @@ const addVideogame = async function (req, res, next) {
 
     let dbGenres = await Genre.findAll({
       where: {
-        id: {
+        name: {
           [Op.in]: genres,
         },
       },
@@ -180,10 +181,12 @@ const getVideogameById = async (req, res, next) => {
       description: videogame.description,
       released: videogame.released,
       rating: videogame.rating,
+      genres: videogame.genres,
       platforms: mappedPlatforms,
       image: videogame.background_image
     }
   }
+  
   return res.json(videogame);
 };
 

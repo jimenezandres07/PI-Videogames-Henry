@@ -2,9 +2,27 @@
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    /* background: linear-gradient(89deg, rgb(21, 74, 189) 0.1%, rgb(26, 138, 211) 51.5%, rgb(72, 177, 234) 100.2%);  */
     
 }
 
-.navigation {
-    
-}
+.createVid {
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    text-shadow: 1px 3px 4px #666666;
+    font-family: Courier New;
+    color: #000000;
+    font-size: 15px;
+    background: #69dadb;
+    padding: 10px 20px 10px 20px;
+    border: solid #5eccc6 2px;
+    text-decoration: none;
+  }
+  
+  .createVid:hover {
+    background: #1597E5;
+    text-decoration: none;
+  }

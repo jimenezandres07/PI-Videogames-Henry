@@ -1,6 +1,7 @@
 import React,{useEffect} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import {setGenre, getVideogames, setPage, setOrigin, getGenres} from '../redux/actions/index'
+import Styles from '../css/Filter.module.css'
 
 function Filter() {
     const {origin, name, genres} = useSelector(state => state)
@@ -24,7 +25,7 @@ function Filter() {
 
 
     return (
-        <div>
+        <div className={Styles.filterContainer}>
             
             <select onChange = {handleGenreSelect}> 
                 <option defaultValue ='' key = 'genres'>Genres</option>

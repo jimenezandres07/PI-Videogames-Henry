@@ -1,4 +1,16 @@
 .cards {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cardsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+    width: 85vw;
+    height: 95vh;
+    border: hotpink;
+    /* overflow-y: scroll; */
 }

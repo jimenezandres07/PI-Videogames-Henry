@@ -1,5 +1,42 @@
 .allSearch {
-    display: block;
-    justify-content: right;
+  display: block;
+  justify-content: right;
+}
+
+.form {
+
+  border-radius: 10px;
+  background-color: #69dadb;
+  color: black;
+  border: none;
+  outline: none;
+  margin-right: 10px;
+  padding: 10px 10px 10px 10px;
+  font-size: 15px;
+  font-family: Courier New;
+  border: solid #5eccc6 2px;
 
 }
+
+.form:focus{
+    background-color: #1597E5;
+}
+
+.button {
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    text-shadow: 1px 3px 4px #666666;
+    color: #000000;
+    font-size: 12px;
+    background: #69dadb;
+    padding: 10px 10px 10px 10px;
+    border: solid #5eccc6 2px;
+    text-decoration: none;
+    margin-right: 10px;
+  }
+  
+  .button:hover {
+    background: #1597E5;
+    text-decoration: none;
+  }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getGenres, postVideogame } from "../redux/actions";
 import { useHistory } from "react-router";
-import Style from'../css/Form.module.css'
+import Style from "../css/Form.module.css";
 
 const platforms = [
   { name: "PlayStation 5", id: 1 },
@@ -21,7 +21,7 @@ const initialState = {
   rating: 0,
   image: "",
   genres: [],
-  platforms,
+  platforms: [],
 };
 const validate = (input) => {
   let errors = {};
@@ -36,8 +36,8 @@ const validate = (input) => {
     errors.genres = "Selecciona entre 1 y 5";
   if (platforms.length < 1 || platforms.length > 5)
     errors.platforms = "Selecciona entre 1 y 5";
-    return errors;
-  };
+  return errors;
+};
 
 function Form() {
   const dispatch = useDispatch();
@@ -46,31 +46,32 @@ function Form() {
 
   const [input, setInput] = useState(initialState);
   const [errors, setErrors] = useState([{}]);
-  
 
   useEffect(() => {
     dispatch(getGenres());
   }, [dispatch]);
-  
-  
+
   useEffect(() => {
     setErrors(validate(input));
   }, [input]);
-  
+
   const onSubmit = (e) => {
     e.preventDefault();
-    dispatch(postVideogame(input));
-    setInput({
+    if(!input.name || !input.description || !input.platforms || !input.genres){
+      alert('Missing parameters')
+    } else {
+      dispatch(postVideogame(input));
+      setInput({
       name: "",
       description: "",
       released: "",
       rating: "",
       image: "",
-      platforms: "",
+      platforms: [],
       genres: [],
     });
+  }
   };
-
 
   const nuevoHandleInputChange = (el) => {
     const { name, value } = el.target;
@@ -83,7 +84,8 @@ function Form() {
         validate({
           ...input,
           [name]: value,
-        }))
+        })
+      );
     } else {
       setInput({
         ...input,
@@ -93,8 +95,9 @@ function Form() {
     setErrors(
       validate({
         ...input,
-        [el.target.name]: el.target.value,
-      }))
+        [name]: value,
+      })
+    );
   };
 
   const handleInputChange = (e) => {
@@ -129,74 +132,104 @@ function Form() {
 
   return (
     <div className={Style.allForm}>
-      <button onClick={goBack}> ⏪ </button>
-      <form onSubmit={onSubmit}>
-        <label>Name</label>
-        <input
-          value={input.name}
-          onChange={handleInputChange}
-          name="name"
-          type="text"
-        />
-        <span>{errors.name}</span>
-        <label>description</label>
-        <input
-          value={input.description}
-          onChange={handleInputChange}
-          name="description"
-          type="text"
-        />
-        <span>{errors.description}</span>
-        <label>Rating</label>
-        <input
-          value={input.rating}
-          onChange={handleInputChange}
-          name="rating"
-          type="text"
-        />
-        <label>released</label>
-        <input
-          value={input.released}
-          onChange={handleInputChange}
-          name="released"
-          type="text"
-        />
-        <label>image</label>
-        <input
-          value={input.image}
-          onChange={handleInputChange}
-          name="image"
-          type="text"
-        />
-        <span>{errors.image}</span>
-        <select onChange={handleInputChange} name="genres" type="text">
-          {genres.length > 0 &&
-            genres.map((e) => (
-              <option key={e.id} value={e.name}>
-                {e.name}
-              </option>
-            ))}
-        </select>
-        <span>{errors.genres}</span>
-        <select onChange={nuevoHandleInputChange} name="platforms">
-          {platforms.length > 0 &&
-            platforms.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.name}
-              </option>
-            ))}
-        </select>
-        <span>{errors.platforms}</span>
-        <input type="submit" value="Create" />
-        {/* {
-                formulario?.episode.length > 0 &&
-                formulario.episode.map(e =>(
-                    <label>{e}</label>
-                ))
-            } */}
-      </form>
+      <div className={Style.left}>
+        <button onClick={goBack}> ⏪ </button>
+      </div>
+      <div className={Style.right}>
+        <form onSubmit={onSubmit} className={Style.form}>
+          <div className={Style.formLeft}>
+            <div className={Style.inputContainer}>
+              <label>Name</label>
+              <input
+                value={input.name}
+                onChange={handleInputChange}
+                name="name"
+                type="text"
+              />
+            </div>
+            <div>
+              <span>{errors.name}</span>
+            </div>
+            <div className={Style.inputContainer}>
+              <label>description</label>
+              <input
+                value={input.description}
+                onChange={handleInputChange}
+                name="description"
+                type="text"
+                className={Style.inputDescription}
+              />
+            </div>
+            <div>
+              <span>{errors.description}</span>
+            </div>
+          </div>
+          <div className={Style.formLeft}>
+            <div className={Style.inputContainer}>
+              <label>Rating</label>
+              <input
+                value={input.rating}
+                onChange={handleInputChange}
+                name="rating"
+                type="number"
+              />
+            </div>
+            <div className={Style.inputContainer}>
+              <label>released</label>
+              <input
+                value={input.released}
+                onChange={handleInputChange}
+                name="released"
+                type="text"
+              />
+            </div>
+            <div className={Style.inputContainer}>
+              <label>image</label>
+              <input
+                value={input.image}
+                onChange={handleInputChange}
+                name="image"
+                type="text"
+              />
+            </div>
+            <div>
+              <span>{errors.image}</span>
+            </div>
+            <div className={Style.inputContainer}>
+              <select onChange={handleInputChange} name="genres" type="text">
+                {genres.length > 0 &&
+                  genres.map((e) => (
+                    <option key={e.id} value={e.name}>
+                      {e.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+            <div>
+              <span>{errors.genres}</span>
+            </div>
+            <div className={Style.inputContainer}>
+              <select onChange={nuevoHandleInputChange} name="platforms">
+                {platforms.length > 0 &&
+                  platforms.map((e) => (
+                    <option key={e.id} value={e.name}>
+                      {e.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+            <div>
+              <span>{errors.platforms}</span>
+            </div>
+            <div>
+              <input type="submit" value="Create" />
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
+
 }
 
 export default Form;

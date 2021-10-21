@@ -25,9 +25,9 @@ function NavSearch() {
 
     return (
         <div className={Styles.allSearch}>
-            <form onSubmit={onSubmit} className="">
-            <input type="text" placeholder="Search..." onChange={handleOnChange} value={input} />
-            <button type="submit" >🔍</button>
+            <form onSubmit={onSubmit}>
+            <input type="text" placeholder="Search..." onChange={handleOnChange} value={input} className={Styles.form} />
+            <button type="submit" className={Styles.button}>🔍</button>
             </form>
         </div>
     )
